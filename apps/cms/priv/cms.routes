@@ -1,0 +1,36 @@
+[
+%% DISPATCH RULE: {"URL MATCH" , handler, opts()}
+
+  { "/favicon.ico",cowboy_static,{priv_file,cms,"static/favicon.ico"}}
+
+ %,{ 404, [{application, cms },{controller, error}, {action, '404'}], []}
+
+ ,{ "/static/gentelella/[...]",
+                      naga_static,
+                      {dir,"deps/gentelella/priv",[{mimetypes,cow_mimetypes,all}]}}
+ ,{ "/static/n2o/[...]",naga_static,{dir,"deps/n2o/priv",[{mimetypes,cow_mimetypes,all}]}}
+ ,{ "/static/[...]",naga_static,{dir,"apps/cms/priv",[{mimetypes,cow_mimetypes,all}]}}
+
+
+%% url cms admin backend
+%% ---------------------
+
+,{ "/admin/login",        [{app,cms},{ctrl,adm_auth}      ,{action,login}],[]} 
+,{ "/admin/logout",       [{app,cms},{ctrl,adm_auth}      ,{action,logout}],[]} 
+,{ "/admin/iforgot/[...]",[{app,cms},{ctrl,adm_auth}      ,{action,iforgot}],[]} 
+
+,{ "/admin/categories",   [{app,cms},{ctrl,adm_categories},{action,index}],[]}
+,{ "/admin/articles",     [{app,cms},{ctrl,adm_articles}  ,{action,index}],[]}
+,{ "/admin/groups",       [{app,cms},{ctrl,adm_groups}    ,{action,index}],[]}
+,{ "/admin/users",        [{app,cms},{ctrl,adm_users}     ,{action,index}],[]}
+
+,{ "/admin/pages",        [{app,cms},{ctrl,adm_pages}     ,{action,index}],[]} 
+,{ "/admin",              [{app,cms},{ctrl,adm_dashboard} ,{action,index}],[]}
+
+
+,{ "/page/[...]",         [{app,cms},{ctrl,cms_page} ,{action,index}],[]}
+,{ "/category/[...]",     [{app,cms},{ctrl,cms_category} ,{action,index}],[]}
+,{ "/article/[...]",      [{app,cms},{ctrl,cms_article} ,{action,index}],[]}
+,{ "/[...]",              [{app,cms},{ctrl,cms_index} ,{action,index}],[]}
+
+].

@@ -1,0 +1,7 @@
+{application, cms,
+  [{description, "cms"},
+   {vsn, "v0.0.1"},
+   {registered, []},
+   {applications, [kernel, stdlib, naga]},
+   {mod, { cms, []}},
+   {env, []} ]}.

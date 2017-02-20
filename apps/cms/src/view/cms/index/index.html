@@ -1,0 +1,24 @@
+{% extends "_layout/page.html" %}
+
+{% block body %}
+
+<table width="" cellspacing="0" cellpadding="4" border="1">
+  <tr>
+     <td>Filter:</td>
+     <td>{{ "Hello world"|my_reverse|my_reverse }}</td>
+     <td>{{ "Hello world"|my_reverse }}</td>
+  </tr>
+  <tr>
+     <td>HTML_TAG</td>
+     <td>{% select_tag %}</td>
+     <td>{% zero %}</td>
+  </tr>
+  <tr>
+     <td>Custom Tag</td>
+     <td>{% reverse string="hello by custom tag" %}</td>
+     <td>{% reverse string="hello by custom tag" %}</td>
+  </tr>
+</table>
+
+{% endblock %}
+

@@ -30,13 +30,15 @@ login(<<"GET">>, _, #{'_base_url' := BaseUrl}) ->
 
 login(<<"POST">>, _, #{'_base_url' := BaseUrl}) ->
   #cx{form=PostData} = ?CTX,
-  Username = proplists:get_value(<<"username">>,PostData),
+  Username = proplists:get_value(<<"email">>,PostData),
   Password = proplists:get_value(<<"password">>,PostData),
-  case check_credential(Username,Password) of
-    {ok, User} -> wf:user(User),
-        case wf:session(<<"after_auth_success">>) of
-          undefined -> {redirect, "/admin"};
-                  R -> {redirect, R} 
+  case check_user(Username,Password) of
+    {ok, User} -> 
+        Identity = identity:new(User),
+        wf:user(Identity),
+        case wf:session({on,auth,success}) of
+          undefined    -> {redirect, "/admin"};
+          {redirect,R} -> {redirect, R} 
         end;
     {error, Raison} ->
       Bindings = loginBindins(BaseUrl)
@@ -50,8 +52,15 @@ loginBindins(BaseUrl) ->
     {register_action, BaseUrl ++ ["/admin/register"]},
     {register_name, "CMS Admin Register"}].
 
-%TODO: user erlapass
-check_credential(<<"admin">>, <<"123456">>) -> {ok, admin}.
+check_user(Email,Pass) ->
+ case m_user:get(Email) of
+  {ok,User} -> 
+    case U:check_credential(Pass) of
+      true  -> {ok, User};
+      false -> {invalid, credential}
+    end;
+  _ -> {invalid,user} 
+ end.
 
 %TODO: 
 error_msg(_) -> "invalid credential".
@@ -60,8 +69,16 @@ error_msg(_) -> "invalid credential".
 %--------------------------------------------------------------------------------
 % REGISTER
 %--------------------------------------------------------------------------------
-register(<<"GET">>, _, _)   ->  
-  {501, <<"not implemented">>, []}.
+register(<<"GET">>, _, _)   ->
+  {501, <<"not implemented">>, []};
+
+register(<<"POST">>,_,_) ->
+  #cx{form=PostData} = ?CTX,
+  Username = proplists:get_value(<<"username">>,PostData),
+  Email = proplists:get_value(<<"email">>,PostData),
+  Pass = proplists:get_value(<<"password">>,PostData),
+  ok.
+
 
 
 %--------------------------------------------------------------------------------

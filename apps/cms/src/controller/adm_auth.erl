@@ -52,10 +52,12 @@ loginBindins(BaseUrl) ->
     {register_action, BaseUrl ++ ["/admin/register"]},
     {register_name, "CMS Admin Register"}].
 
+check_user(Email,Pass) when is_binary(Email)->
+  check_user(wf:to_list(Email),Pass);
 check_user(Email,Pass) ->
  case m_user:get(Email) of
   {ok,User} -> 
-    case U:check_credential(Pass) of
+    case User:check_credential(Pass) of
       true  -> {ok, User};
       false -> {invalid, credential}
     end;

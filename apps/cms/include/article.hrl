@@ -8,7 +8,6 @@
 -record(article, {?ITERATOR(feed, true), %% nitro have an article record also
            created        = 0     :: seconds(),
            modified       = 0     :: seconds(),
-           category_id    = -1    :: fk_category(),
            publish_date   = 0     :: time(), %
            status         = draft :: draft | proposed | published | refused | dustbin,
            title          = []    :: string(),

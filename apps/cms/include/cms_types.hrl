@@ -1,7 +1,6 @@
 -ifndef(CMS_TYPES_HRL).
 -define(CMS_TYPES_HRL, true).
 
-%%TODO: typed record => generate validator using proper ?
 -type foreign_key() :: integer().
 -type fk()          :: foreign_key().
 -type fk_category() :: foreign_key().
@@ -17,5 +16,6 @@
 -type path()        :: string().
 -type filename()    :: string().
 -type markdown()    :: string().
+-type email()       :: string().
 
 -endif.

@@ -138,7 +138,7 @@ wf:render(
              placeholder="Password", data_fields=[{required,<<>>}]}
     ]},
   #panel{body=[
-      #button{class="btn btn-default submit", 
+      #button{class=["btn btn-default submit"], 
              postback=register, source=[username,email,password],
              body=["submit"]
              }

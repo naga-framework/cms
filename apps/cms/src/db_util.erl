@@ -119,7 +119,7 @@ save(Record, ok) ->
           end
   end,
   % Action dependent valitation
-  io:format("isNew ~p : ~p~n",[IsNew,OldRecord]),
+  %io:format("isNew ~p : ~p~n",[IsNew,OldRecord]),
   case validate_record(OldRecord, IsNew) of
       ok ->
           HookResult = case run_before_hooks(Record, OldRecord, IsNew) of
@@ -127,7 +127,7 @@ save(Record, ok) ->
                          {ok, Record1} -> {ok, Record1};
                          {error, Reason} -> {error, Reason}
                        end,
-          io:format("HookResult ~p~n",[HookResult]),        
+          %io:format("HookResult ~p~n",[HookResult]),        
           case HookResult of
               {ok, PossiblyModifiedRecord} ->
                   case save_record(IsNew, PossiblyModifiedRecord) of

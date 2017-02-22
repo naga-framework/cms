@@ -41,19 +41,18 @@ prepare_json([{K,V}|T],Acc) -> prepare_json(T,[{K,V}]++Acc).
 before_create(R) ->
   Email = R:get(email),
   case m_user:get(Email) of
-    {ok,U} -> {error, already_exits};
+    {ok,U} -> {error, already_exist};
     {error,notfound} -> 
       Password = R:get(password),
       {ok,Cfg} = config:get(password),
       {Hmac, Salt, Iterations, DerivedLength} = Cfg:get(value),
       {ok,Key} = pbkdf2:pbkdf2(Hmac, Password, Salt, Iterations, DerivedLength),
       R1 = R:set(password,Key),
-      io:format("Before Create ~p~n",[R1]),
+      %io:format("Before Create ~p~n",[R1]),
       {ok, R1}
   end.
 
 before_update(Old,New) -> 
-
   io:format("Diff ~p~n",[?db:diff(Old,New)]),
   {ok, New}.
 

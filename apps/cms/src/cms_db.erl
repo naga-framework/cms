@@ -6,7 +6,6 @@
 -include_lib("kvs/include/config.hrl").
 -include_lib("kvs/include/group.hrl").
 %-include_lib("kvs/include/comment.hrl").
-%-include_lib("kvs/include/user.hrl").
 %-include_lib("kvs/include/product.hrl").
 %-include_lib("kvs/include/subscription.hrl").
 

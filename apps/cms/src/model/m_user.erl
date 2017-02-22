@@ -16,7 +16,9 @@ attributes(R)-> ?db:attributes(R).
 
 get(Email) when is_list(Email)-> 
   case kvs:index(?model,email,Email) of
-    []->{error,notfound};[U] -> {ok,U} 
+    []  ->{error,notfound};
+    [U] ->{ok,U};
+    M   ->{error,notunique} 
   end;
 get(Id) when is_integer(Id) -> 
   kvs:get(m_user,Id).
@@ -36,14 +38,19 @@ prepare_json([{K,V}|T],Acc) -> prepare_json(T,[{K,V}]++Acc).
 % -----------------------------------------------------------------------------
 % before/after[save] before/after[update] before/after[delete]
 % -----------------------------------------------------------------------------
-before_create(R) -> 
-  Password = R:get(password),
-  {ok,Cfg} = config:get(password),
-  {Hmac, Salt, Iterations, DerivedLength} = Cfg:get(value),
-  {ok,Key} = pbkdf2:pbkdf2(Hmac, Password, Salt, Iterations, DerivedLength),
-  R1 = R:set(password,Key),
-  io:format("Before Create ~p~n",[R1]),
-  {ok, R1}.
+before_create(R) ->
+  Email = R:get(email),
+  case m_user:get(Email) of
+    {ok,U} -> {error, already_exits};
+    {error,notfound} -> 
+      Password = R:get(password),
+      {ok,Cfg} = config:get(password),
+      {Hmac, Salt, Iterations, DerivedLength} = Cfg:get(value),
+      {ok,Key} = pbkdf2:pbkdf2(Hmac, Password, Salt, Iterations, DerivedLength),
+      R1 = R:set(password,Key),
+      io:format("Before Create ~p~n",[R1]),
+      {ok, R1}
+  end.
 
 before_update(Old,New) -> 
 

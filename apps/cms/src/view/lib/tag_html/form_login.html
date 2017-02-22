@@ -1,7 +1,7 @@
 <form method="post" action="{{form_action}}">
   <h1>{% if form_name %}{{form_name}}{%else%}Login{%endif%}</h1>
   <div>
-    <input name="username" type="text" class="form-control" placeholder="{% trans "Username" %}" required="" />
+    <input name="email" type="text" class="form-control" placeholder="{% trans "Email" %}" required="" />
   </div>
   <div>
     <input name="password" type="password" class="form-control" placeholder="{% trans "Password" %}" required="" />

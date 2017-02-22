@@ -1,4 +1,4 @@
-<form method="post" action="{{form_action}}">
+<form method="post" action="{{form_action}}" novalidate>
   <h1>{% if form_name %}{{form_name}}{%else%}Login{%endif%}</h1>
   <div>
     <input name="email" type="text" class="form-control" placeholder="{% trans "Email" %}" required="" />

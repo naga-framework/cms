@@ -37,11 +37,24 @@
 
         <div id="register" class="animate form registration_form">
           <section class="login_content">
+          {% if wsFormRegister %}{{wsFormRegister}}{% else %} 
             {% form_register form_name=register_name form_action=register_action %}
+          {% endif %}
           </section>
         </div>
       </div>
 
     </div>
+<script>{{script}}</script>
+<script src='/static/n2o/protocols/bert.js'></script>
+<script src='/static/n2o/protocols/client.js'></script>
+<script src='/static/n2o/protocols/nitrogen.js'></script>
+<script src='/static/n2o/bullet.js'></script>
+<script src='/static/n2o/xhr.js'></script>
+<script src='/static/n2o/utf8.js'></script>
+<script src='/static/n2o/template.js'></script>
+<script src='/static/n2o/n2o.js'></script>
+<script src='/static/n2o/validation.js'></script>
+<script>protos = [$client,$bert]; N2O_start();</script>
   </body>
 </html>

@@ -40,7 +40,7 @@ login(<<"POST">>, _, #{'_base_url' := BaseUrl}) ->
           undefined    -> {redirect, "/admin"};
           {redirect,R} -> {redirect, R} 
         end;
-    {error, Raison} ->
+    {invalid, Raison} ->
       Bindings = loginBindins(BaseUrl)
                  ++ [{login_error, error_msg(Raison)}],
       {ok, Bindings} 

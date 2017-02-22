@@ -5,6 +5,14 @@
 before_filter(_,Ctx) -> 
   {Path,_} = cowboy_req:path(?REQ),
   case wf:user() of
-    undefined -> wf:session(<<"after_auth_success">>, Path),
-                 {redirect, {http, "/admin/login"}};
-    Identity  -> {ok, Ctx#{ identity => Identity}} end.
+    undefined -> 
+      wf:session({on,auth,success}, {redirect,Path}),
+      {redirect, {http, "/admin/login"}};
+    #{is_blocked := false}=Identity -> 
+      {ok, Ctx#{ identity => Identity}};
+    #{is_blocked := true}=Identity -> 
+      {redirect, {http, "/admin/profile"}}
+  end.
+
+
+

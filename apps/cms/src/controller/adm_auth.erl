@@ -46,7 +46,7 @@ login(<<"POST">>, _, #{'_base_url' := BaseUrl}) ->
   end.
 
 bindings(BaseUrl) ->
-  Vendors = [jquery,bootstrap3,fontawesome,nprogress,animate,pnotify],
+  Vendors = [jquery,bootstrap3,fontawesome,nprogress,animate,pnotify,gentelella],
   CSS = gentelella:vendors(css,Vendors),
   JS  = gentelella:vendors(js,Vendors),
    [{login_action, BaseUrl ++ ["/admin/login"]},
@@ -81,12 +81,16 @@ iforgot(<<"GET">>, [<<"password">> =Type], #{'_base_url' := BaseUrl})   ->
 
 
 %--------------------------------------------------------------------------------
-% NOTIFY
+% HELPER
 %--------------------------------------------------------------------------------
 notify(Type,Title,Msg) -> 
   gentelella:pnotify(Type,Title,Msg),
   ok.
- 
+
+redirect(Sec,Redirect) ->
+  wf:wire(wf:f("setTimeout(function(){window.location='~s';}, ~B);",
+          [Redirect,1000*Sec])). 
+
 error_msg({invalid,user}) -> "invalid user.";
 error_msg({invalid,credential}) -> "invalid credential.";
 error_msg({error,already_exist}) -> "user already exist.".
@@ -104,7 +108,8 @@ event(register) ->
                         end,[],[email,username,password]),
   User    = m_user:new(Params),
   case User:save() of
-   {ok, U} -> {redirect, "/admin/login"};
+   {ok, U} -> notify(success,"Register", "you will be redirected in few second."),
+              redirect(2,"/admin");
    Err     -> notify(error,"Register",error_msg(Err))
   end;
 event(Event) -> 

@@ -41,19 +41,21 @@ login(<<"POST">>, _, #{'_base_url' := BaseUrl}) ->
           undefined    -> {redirect, "/admin"};
           {redirect,R} -> {redirect, R} 
         end;
-    {invalid, Raison} ->
-      %TODO: show form error
-      Bindings = bindings(BaseUrl)
-                 ++ [{login_error, error_msg(Raison)}],
-      {ok, Bindings} 
+    {invalid, _}=Err ->
+      {ok, bindings(BaseUrl)++[{errMsg,error_msg(Err)}]} 
   end.
 
-bindings(BaseUrl) -> 
+bindings(BaseUrl) ->
+  Vendors = [jquery,bootstrap3,fontawesome,nprogress,animate,pnotify],
+  CSS = gentelella:vendors(css,Vendors),
+  JS  = gentelella:vendors(js,Vendors),
    [{login_action, BaseUrl ++ ["/admin/login"]},
     {login_name, "CMS Admin Login"},
     {register_action, BaseUrl ++ ["/admin/register"]},
     {register_name, "CMS Admin Register"},
-    {wsFormRegister, wsFormRegister()}].
+    {wsFormRegister, wsFormRegister()},
+    {page,[{css,CSS},{js,JS}]}
+   ].
 
 check_user(Email,Pass) when is_binary(Email)->
   check_user(wf:to_list(Email),Pass);
@@ -67,8 +69,6 @@ check_user(Email,Pass) ->
   _ -> {invalid,user} 
  end.
 
-%TODO: 
-error_msg(_) -> "invalid credential".
 
 
 
@@ -79,6 +79,17 @@ iforgot(<<"GET">>, [<<"password">> =Type], #{'_base_url' := BaseUrl})   ->
   io:format("IFORGOT ~p~n",[Type]),
   {501, <<"not implemented">>, []}.
 
+
+%--------------------------------------------------------------------------------
+% NOTIFY
+%--------------------------------------------------------------------------------
+notify(Type,Title,Msg) -> 
+  gentelella:pnotify(Type,Title,Msg),
+  ok.
+ 
+error_msg({invalid,user}) -> "invalid user.";
+error_msg({invalid,credential}) -> "invalid credential.";
+error_msg({error,already_exist}) -> "user already exist.".
 
 %--------------------------------------------------------------------------------
 % EVENT HANDLING
@@ -94,15 +105,11 @@ event(register) ->
   User    = m_user:new(Params),
   case User:save() of
    {ok, U} -> {redirect, "/admin/login"};
-   Err     -> notify(Err)
+   Err     -> notify(error,"Register",error_msg(Err))
   end;
 event(Event) -> 
   wf:info(?MODULE,"Unknown Event: ~p~n",[Event]).
 
-
-notify(Err) -> 
-  io:format("Register Error ~p~n",[Err]),
-  skip.
 
 %--------------------------------------------------------------------------------
 % 

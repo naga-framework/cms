@@ -10,17 +10,10 @@
 
     <title>{{page.title}} </title>
 
-    <!-- Bootstrap -->
-    <link href="{{_base_url}}/static/gentelella/vendors/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link href="{{_base_url}}/static/gentelella/vendors/font-awesome/css/font-awesome.min.css" rel="stylesheet">
-    <!-- NProgress -->
-    <link href="{{_base_url}}/static/gentelella/vendors/nprogress/nprogress.css" rel="stylesheet">
-    <!-- Animate.css -->
-    <link href="{{_base_url}}/static/gentelella/vendors/animate.css/animate.min.css" rel="stylesheet">
-
+    {{page.css}}
     <!-- Custom Theme Style -->
     <link href="{{_base_url}}/static/gentelella/build/css/custom.min.css" rel="stylesheet">
+
   </head>
 
   <body class="login">
@@ -56,5 +49,6 @@
 <script src='/static/n2o/n2o.js'></script>
 <script src='/static/n2o/validation.js'></script>
 <script>protos = [$client,$bert]; N2O_start();</script>
+{{page.js}}
   </body>
 </html>

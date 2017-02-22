@@ -6,6 +6,7 @@
 
 -include_lib("kvs/include/config.hrl").
 -include("cms.hrl").
+%-include("user.hrl").
 
 main(A)    -> mad_repl:sh(A).
 start(_,_) -> supervisor:start_link({local,cms }, cms,[]).
@@ -13,6 +14,11 @@ stop(_)    -> ok.
 init([])   -> ensure_loaded(),
               kvs:join(),
               init_cms(),
+              
+              admin(wf:config(cms,adm_email,"admin@csm.naga"),
+                    wf:config(cms,adm_username,"admin"),
+                    wf:config(cms,adm_password,"123456")),
+
               naga:start([cms]), 
               naga:watch([cms,gentelella]),
               sup().
@@ -47,11 +53,19 @@ admin() ->
   Email = getinput("   email: "),
   Name  = getinput("username: "),
   Pass  =  getpass("password: "),
+  admin(Email,Name,Pass).
+
+admin(Email,Name,Pass) ->
   User  = m_user:new([{email,Email},
                       {username,Name},
                       {password,Pass}]),
-  {ok, U} = User:save(),
-  grant({user, U:get(email)}, admin).
+  case User:save() of
+    {ok, U} ->
+      grant(U, admin),
+      grant(U, author),
+      grant(U, moderator);
+    Err -> Err
+  end.
 
 
 getinput(Prompt) -> 
@@ -89,6 +103,7 @@ config() ->
 features() -> 
   [#feature{id={read,article}  ,name="Read an article."},
    #feature{id={write,article} ,name="Create/Edit/Delete article."},
+   #feature{id={aprove,article},name="Aprove an article."},
 
    #feature{id={read,category} ,name="Read a category."},
    #feature{id={write,category},name="Create/Edit/Delete a category."},
@@ -97,9 +112,26 @@ features() ->
    #feature{id={write,post}    ,name="Create/Reply a post."}
   ].
 
-revoke(User,Feature) -> kvs_acl:define_access(User, {feature, Feature}, disable).
-grant(User,Feature)  -> kvs_acl:define_access(User, {feature, Feature}, allow).
+revoke(User,Feature) -> cms_acl:define_access({user,User:get(email)}, {feature, Feature}, disable).
+grant(User,Feature)  -> cms_acl:define_access({user,User:get(email)}, {feature, Feature}, allow).
 
-admin(U) -> [grant({user,U},F)||{F,_}<- features()].
+admin(U)    -> grant(U,admin).
+author(U)   -> grant(U,author).
+moderator(U)-> grant(U,moderator).
+
 revoke(User) -> [revoke(User,F)||F<-features()].
+
+is_admin(U) when is_tuple(U)  -> is_admin(U:get(email)); 
+is_admin(Id) when is_list(Id) -> 
+  cms_acl:check_access({user,Id},{feature,admin}) =:= allow.
+is_author(U) when is_tuple(U)  -> is_author(U:get(email));   
+is_author(Id) when is_list(Id) -> 
+  cms_acl:check_access({user,Id},{feature,author}) =:= allow.
+is_moderator(U) when is_tuple(U)  -> is_moderator(U:get(email));
+is_moderator(Id) when is_list(Id) -> 
+  cms_acl:check_access({user,Id},{feature,moderator}) =:= allow.
+is_blocked(U) when is_tuple(U)  -> is_blocked(U:get(email));
+is_blocked(Id) when is_list(Id) -> 
+  cms_acl:check_access({user,Id},{feature,blocked}) =:= allow.
+
 

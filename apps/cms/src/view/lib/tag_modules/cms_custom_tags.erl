@@ -19,9 +19,13 @@ reverse(Variables, Options) ->
 my_sidebar_menu(_Vars,_Opts) ->
  wf:render(
   #panel{id= <<"sidebar-menu">>, class=["main_menu_side hidden-print main_menu"], body=[
-    #panel{class=[menu_section],body=[
-      #h3{body=["CMS"]}
-    ]},
+    section_general()
+    %,section("PLUGINS")
+  ]}).  
+
+section_general()->
+  #panel{class=[menu_section],body=[
+    #h3{body=["GENERAL"]},
     #ul{class=["nav side-menu"], body=[
       #li{body=[
         #link{ href="/admin",body=[
@@ -56,4 +60,12 @@ my_sidebar_menu(_Vars,_Opts) ->
         ]}
       ]}    
     ]}
-  ]}).  
+  ]}.
+
+section(Title)->
+  #panel{class=[menu_section],body=[
+    #h3{body=[Title]},
+    #ul{class=["nav side-menu"], body=[
+      
+    ]}
+  ]}.

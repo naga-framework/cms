@@ -9,7 +9,7 @@
                       naga_static,
                       {dir,"deps/gentelella/priv",[{mimetypes,cow_mimetypes,all}]}}
  ,{ "/static/n2o/[...]",naga_static,{dir,"deps/n2o/priv",[{mimetypes,cow_mimetypes,all}]}}
- ,{ "/static/[...]",naga_static,{dir,"apps/cms/priv",[{mimetypes,cow_mimetypes,all}]}}
+ ,{ "/static/[...]",naga_static,{dir,"apps/cms/priv/static",[{mimetypes,cow_mimetypes,all}]}}
 
 
 %% url cms admin backend

@@ -31,6 +31,7 @@
 
 ,{ "/admin/pages",        [{app,cms},{ctrl,adm_pages}     ,{action,index}],[]} 
 ,{ "/admin/dashboard",    [{app,cms},{ctrl,adm_dashboard} ,{action,index}],[]}
+,{ "/admin/error/404",    [{app,cms},{ctrl,adm_error}     ,{action,'404'}],[]}
 ,{ "/admin",              [{app,cms},{ctrl,adm_dashboard} ,{action,index}],[]}
 
 

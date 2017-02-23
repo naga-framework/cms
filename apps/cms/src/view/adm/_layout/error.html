@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="{% if _lang %}{{_lang}}{% else %}en{% endif %}">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!-- Meta, title, CSS, favicons, etc. -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {{page.meta}}
+    <title>{{page.title}}</title>
+    {{page.css}}
+</head>
+<body class="nav-md">
+  <body class="nav-md">
+    <div class="container body">
+      <div class="main_container">
+        {% block page_content %}{% endblock %}
+      </div>
+    </div>
+ {{page.js}}
+</body>
+</html>

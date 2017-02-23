@@ -11,13 +11,33 @@
 -include_lib("cms/include/cms.hrl").
 
 %--------------------------------------------------------------------------------
-% CONTROLLER
+% INDEX
 %--------------------------------------------------------------------------------
 index(<<"GET">>, _, _)   -> 
   {501, <<"not implemented">>, []}.
 
-profile(<<"GET">>, _, #{identity := Identity} = Ctx) -> 
-  {ok,[{identity,maps:to_list(Identity)}]}.
+%--------------------------------------------------------------------------------
+% PROFILE
+%--------------------------------------------------------------------------------
+profile(<<"GET">>, _, #{identity:=Identity} = Ctx)   -> 
 
+  io:format("Identity ~p~n",[Identity]),
+  VendorsCSS = [bootstrap3,fontawesome,
+                nprogress,icheck,prettify,select2,switchery,starrr,
+                pnotify,gentelella],
+  VendorsJS = [jquery,bootstrap3,fastclick,progressbar,
+                nprogress,raphael,morris,icheck,moment,
+                daterangepicker,wysiwyg,hotkeys,prettify,
+                tagsinput,switchery,select2,parsley,autosize,
+                autocomplete,pnotify,starrr,gentelella],
+  Bindings = cms_lib:bindings(Identity,VendorsCSS,VendorsJS),
+
+  {ok, Bindings}.
+      
+
+
+%--------------------------------------------------------------------------------
+% EVENT HANDLING
+%--------------------------------------------------------------------------------      
 event(Event) -> 
   wf:info(?MODULE,"Unknown Event: ~p~n",[Event]).

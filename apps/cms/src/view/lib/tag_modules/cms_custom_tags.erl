@@ -16,7 +16,9 @@ reverse(Variables, Options) ->
 %
 % Variables are the passed-in vars in your template
 
-
+%------------------------------------------------------------------------------
+% TOPNAV
+%------------------------------------------------------------------------------
 my_top_nav(Vars, Opts) ->
  wf:render(
   #panel{class=[top_nav], body=[
@@ -69,11 +71,12 @@ help()->
 
 settings() ->
   #li{body=[
-    #link{href="/admin/settings",, body=[
+    #link{href="/admin/settings", body=[
       #span{class=["badge bg-red pull-right"],body=["50%"]},
       #span{body=["Settings"]}
     ]}
   ]}.
+
 notifications() ->
   #li{class=[dropdown],data_fields=[{role,presentation}],body=[
     #link{href="javascript:;",class=["dropdown-toggle info-number"],
@@ -114,7 +117,9 @@ msg() ->
   ]}
  ]}.
 
-
+%------------------------------------------------------------------------------
+% SIDEBAR MENU
+%------------------------------------------------------------------------------
 my_sidebar_menu(_Vars,_Opts) ->
  wf:render(
   #panel{id= <<"sidebar-menu">>, class=["main_menu_side hidden-print main_menu"], body=[
@@ -126,38 +131,51 @@ section_general()->
   #panel{class=[menu_section],body=[
     #h3{body=["GENERAL"]},
     #ul{class=["nav side-menu"], body=[
+      dashboard(),          
       #li{body=[
-        #link{ href="/admin",body=[
-          #i{class=["fa fa-dashboard"]},
-          "Dashboard"
-        ]}
-      ]},          
-      #li{body=[
-        #link{body=[
-          #i{class=["fa fa-list"]},
-          "Articles"
-        ]},
+        articles(),
         #ul{class=["nav child_menu"], body=[
-          #li{body=[
-            #link{href="/admin/articles",body=["All Articles"]}
-          ]},
-          #li{body=[
-            #link{href="/admin/article/add",body=["Add New"]}
-          ]}
+          all_articles(),
+          add_article()
         ]}        
       ]},
-      #li{body=[
-        #link{ href="/admin/comments",body=[
-          #i{class=["fa fa-comments"]},
-          "Comments"
-        ]}
-      ]},
-      #li{body=[
-        #link{ href="/admin/profile",body=[
-          #i{class=["fa fa-user"]},
-          "Profile"
-        ]}
-      ]}    
+      comments(),
+      profile(#i{class=["fa fa-user"]})
+    ]}
+  ]}.
+dashboard() ->
+  #li{body=[
+    #link{ href="/admin",body=[
+      #i{class=["fa fa-dashboard"]},
+      "Dashboard"
+    ]}
+  ]}.
+articles() ->
+  #link{body=[
+    #i{class=["fa fa-list"]},
+    "Articles"
+  ]}.
+all_articles() ->
+  #li{body=[
+    #link{href="/admin/articles",body=["All Articles"]}
+  ]}.
+add_article() ->
+  #li{body=[
+    #link{href="/admin/article/add",body=["Add New"]}
+  ]}.
+comments() ->
+  #li{body=[
+    #link{ href="/admin/comments",body=[
+      #i{class=["fa fa-comments"]},
+      "Comments"
+    ]}
+  ]}.
+
+profile(Icon) ->
+  #li{body=[
+    #link{ href="/admin/profile",body=[
+      Icon,
+      "Profile"
     ]}
   ]}.
 

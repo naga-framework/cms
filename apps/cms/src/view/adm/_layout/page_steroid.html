@@ -17,21 +17,23 @@
         <div class="col-md-3 left_col">
           <div class="left_col scroll-view">
             <div class="navbar nav_title" style="border: 0;">
-              <a href="index.html" class="site_title"><i class="fa fa-paw"></i> <span>Gentelella Alela!</span></a>
+              <a href="/" class="site_title">
+                <i class="fa fa-paw"></i>
+                <span>{%if page.title %}{{page.title}}
+                {%else%}Gentelella Alela!{%endif%}
+                </span>
+              </a>
             </div>
 
             <div class="clearfix"></div>
             {% menu_profile_quick_info %}
             <br />
-
-            {% sidebar_menu %}
-            {% sidebar_footer_menu %}
+            {% my_sidebar_menu %}
           </div>
         </div>
         {% top_nav %}
         {% block page_content %} {% endblock %}
         {% page_footer %}
-
       </div>
     </div>
 

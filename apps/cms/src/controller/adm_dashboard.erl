@@ -33,13 +33,18 @@ bindings(#{user:=User}) ->
   JS  = gentelella:vendors(js,VendorsJS),
    [
     {user,User:attributes()},
-    {app, [{name,?APP_NAME},{vsn,?APP_VSN}]},
+    {app, [{name,?APP_NAME},
+           {vsn,?APP_VSN},
+           {credit, "CMS with Gentelella "
+                    "Bootstrap Admin Template, powered by "
+                    "<a href='http://github.com/naga-framework/naga'>naga-framework"}
+           ]},
     {page,[{css,CSS},
-           {title,"Dashboard"},
+           {title,"CMS Demo"},
            {js,JS}]}
    ].
 
-
+            
 
 event(Event) -> 
   wf:info(?MODULE,"Unknown Event: ~p~n",[Event]).

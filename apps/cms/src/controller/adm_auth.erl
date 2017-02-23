@@ -60,7 +60,7 @@ bindings(BaseUrl) ->
 check_user(Email,Pass) when is_binary(Email)->
   check_user(wf:to_list(Email),Pass);
 check_user(Email,Pass) ->
- case m_user:get(Email) of
+ case xuser:get(Email) of
   {ok,User} -> 
     case User:check_credential(Pass) of
       true  -> {ok, User};
@@ -106,7 +106,7 @@ event(register) ->
   Params  = lists:foldl(fun(X,Acc)->
                           [{X,wf:to_list(wf:q(X))}|Acc]
                         end,[],[email,username,password]),
-  User    = m_user:new(Params),
+  User    = xuser:new(Params),
   case User:save() of
    {ok, U} -> notify(success,"Register", "you will be redirected in few second."),
               redirect(2,"/admin");

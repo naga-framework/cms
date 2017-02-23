@@ -56,7 +56,7 @@ admin() ->
   admin(Email,Name,Pass).
 
 admin(Email,Name,Pass) ->
-  User  = m_user:new([{email,Email},
+  User  = xuser:new([{email,Email},
                       {username,Name},
                       {password,Pass}]),
   case User:save() of

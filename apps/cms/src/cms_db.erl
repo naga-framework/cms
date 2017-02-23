@@ -25,7 +25,7 @@ forbid(_)          -> 100.
 
 metainfo() ->
     #schema{name=cms,tables=[
-         ?table(m_user     ,?m_user_keys)
+         ?table(xuser      ,?xuser_keys)
         ,?table(config     ,[])  
         ,?table(category   ,?category_keys)
         ,?table(article    ,?article_keys)

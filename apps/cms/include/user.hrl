@@ -4,9 +4,12 @@
 -include_lib("kvs/include/kvs.hrl").
 -include("cms_types.hrl").
 
--define(m_user_keys,[email]).
--record(m_user, {?ITERATOR(feed, true),
+-define(xuser_keys,[email]).
+-record(xuser, {?ITERATOR(feed, true),
            register_date  = 0   :: seconds(),
+           avatar         = undefined :: fk(),
+           firstname      = []  :: string(),
+           lastname       = []  :: string(), 
            username       = []  :: string(),
            email          = []  :: email(), %{regex,<<"^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$">>}
            password       = <<>>:: binary() 

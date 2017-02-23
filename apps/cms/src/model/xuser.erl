@@ -1,4 +1,4 @@
--module(m_user).
+-module(xuser).
 -include_lib("kvs/include/metainfo.hrl").
 -include("cms.hrl").
 -compile(export_all).
@@ -21,7 +21,7 @@ get(Email) when is_list(Email)->
     M   ->{error,notunique} 
   end;
 get(Id) when is_integer(Id) -> 
-  kvs:get(m_user,Id).
+  kvs:get(xuser,Id).
 
 get(F,R)     -> ?db:get_value(F,R).
 set(F,V,R)   -> ?db:set_value(F,V,R).
@@ -40,7 +40,7 @@ prepare_json([{K,V}|T],Acc) -> prepare_json(T,[{K,V}]++Acc).
 % -----------------------------------------------------------------------------
 before_create(R) ->
   Email = R:get(email),
-  case m_user:get(Email) of
+  case xuser:get(Email) of
     {ok,U} -> {error, already_exist};
     {error,notfound} -> 
       Password = R:get(password),

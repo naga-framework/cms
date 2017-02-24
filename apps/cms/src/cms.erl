@@ -15,7 +15,7 @@ init([])   -> ensure_loaded(),
               kvs:join(),
               init_cms(),
               
-              admin(wf:config(cms,adm_email,"admin@csm.naga"),
+              admin(wf:config(cms,adm_email,"admin@localhost.com"),
                     wf:config(cms,adm_username,"admin"),
                     wf:config(cms,adm_password,"123456")),
 

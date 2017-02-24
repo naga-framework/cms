@@ -160,6 +160,9 @@ my_avatar(Vars, Opts) ->
 % TOPNAV
 %------------------------------------------------------------------------------
 my_top_nav(Vars, Opts) ->
+ User = proplists:get_value(user,Vars,[]),
+ Avatar = proplists:get_value(avatar, User), 
+ Username = proplists:get_value(username, User),
  wf:render(
   #panel{class=[top_nav], body=[
     #panel{class=[nav_menu], body=[
@@ -167,7 +170,7 @@ my_top_nav(Vars, Opts) ->
         toogle(),
         #ul{class=["nav navbar-nav navbar-right"], body=[
           #li{class=[], body=[
-            avatar(),
+            avatar(Username,Avatar),
             #ul{class=["dropdown-menu dropdown-usermenu pull-right"], body=[
               profile(),
               logout()
@@ -185,12 +188,14 @@ toogle() ->
       #i{class=["fa fa-bars"]}
     ]}
   ]}.
-avatar() ->
+avatar(Name,Img) ->
   #link{href="javascript:;", class=["user-profile dropdown-toggle"], 
         data_fields=[{'data-toggle', dropdown},{'aria-expanded',false}],
         body=[
-    #image{src="/static/gentelella/images/img.jpg"},
-    "John Doe",
+    case Img of 
+      undefined -> #image{src="/static/assets/images/image.png"};
+      _ -> #image{src=Img} end,
+    Name,
     #span{class=["fa fa-angle-down"]}
   ]}.
 logout() ->

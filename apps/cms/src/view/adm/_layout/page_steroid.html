@@ -24,12 +24,12 @@
             </div>
 
             <div class="clearfix"></div>
-            {% menu_profile_quick_info %}
+            {% my_quick_info user=user %}
             <br />
             {% my_sidebar_menu %}
           </div>
         </div>
-        {% my_top_nav %}
+        {% my_top_nav user=user %}
         {% block page_content %} {% endblock %}
         {% page_footer %}
       </div>

@@ -35,9 +35,42 @@ profile(<<"GET">>, _, #{identity:=Identity} = Ctx)   ->
   {ok, Bindings}.
       
 
+%--------------------------------------------------------------------------------
+% ACCESS
+%--------------------------------------------------------------------------------      
+access(#{is_admin:=true},User) -> true;
+access(#{is_admin:=false, user:=U},User) -> 
+  Id1 = U:get(id),
+  Id2 = proplists:get_value(id,User), 
+  Id1 =:= Id2 andalso Id1 /= undefined andalso Id2 /= undefined.
 
 %--------------------------------------------------------------------------------
 % EVENT HANDLING
 %--------------------------------------------------------------------------------      
+event({update,userInfo,User}) -> 
+  Identity = wf:user(),
+  case access(Identity,User) of
+    true ->  Id = proplists:get_value(id,User),
+             Firstname = wf:q(firstname),
+             Lastname = wf:q(lastname), 
+             {ok,U} = xuser:get(Id),
+             U1 = U:set(firstname,Firstname),
+             U2 = U1:set(lastname,Lastname),
+             case U2:save() of
+              {ok,_} -> cms_lib:notify(success,"Udpate profile", "done.");
+              _ -> cms_lib:notify(success,"Udpate profile", "done.")
+             end;
+    false -> cms_lib:notify(error,"Udpate profile", "not authorized.")
+  end;
+
+
+event({change,password,User}) -> 
+  io:format("USER ~p",[User]),
+  Password = wf:q(password),
+  Confirm = wf:q(confirm),
+  #{user := U} = wf:user(), 
+  cms_lib:notify(error,"Change password", "not yet implemented.");
+
+
 event(Event) -> 
   wf:info(?MODULE,"Unknown Event: ~p~n",[Event]).

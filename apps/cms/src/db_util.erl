@@ -68,9 +68,9 @@
 %     end.
 
 
-run_before_hooks(_OldRecord, Record, true) ->
+run_before_hooks(Record, OldRecord, true) ->
     run_hooks(Record, element(1, Record), before_create);
-run_before_hooks(OldRecord, Record, false) ->
+run_before_hooks(Record, OldRecord, false) ->
     run_hooks(OldRecord, Record, element(1, Record), before_update).
 
 run_after_hooks(_UnsavedRecord, SavedRecord, true) ->
@@ -115,7 +115,7 @@ save(Record, ok) ->
           case Type:get(RecordId) of
               {error, _Reason} -> {true, Record};
               undefined        -> {true, Record};
-              FoundOldRecord   -> {false, FoundOldRecord}
+              {ok, FoundOldRecord}   -> {false, FoundOldRecord}
           end
   end,
   % Action dependent valitation
@@ -227,8 +227,12 @@ validate_record(Record, IsNew) ->
 %         _ -> {error, Errors}
 %     end.
 
+%% add new record
 save_record(true,  R) -> kvs:add(R);
-save_record(false, R) -> kvs:put(R).
+%% update a record
+save_record(false, R) -> case kvs:put(R) of 
+                          ok -> kvs:get(element(1,R),element(2,R));
+                          Err -> Err end.
 
 
 

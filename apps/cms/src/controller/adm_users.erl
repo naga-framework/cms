@@ -31,18 +31,23 @@ profile(<<"GET">>, _, #{identity:=Identity} = Ctx)   ->
                 tagsinput,switchery,select2,parsley,autosize,
                 autocomplete,pnotify,starrr,gentelella],
   Bindings = cms_lib:bindings(Identity,VendorsCSS,VendorsJS),
-
   {ok, Bindings}.
       
 
 %--------------------------------------------------------------------------------
 % ACCESS
 %--------------------------------------------------------------------------------      
+%%TODO when session expire lock the user, ask him to login 
+access(undefined,User)         -> false;
 access(#{is_admin:=true},User) -> true;
 access(#{is_admin:=false, user:=U},User) -> 
   Id1 = U:get(id),
   Id2 = proplists:get_value(id,User), 
   Id1 =:= Id2 andalso Id1 /= undefined andalso Id2 /= undefined.
+
+update_identity(#{user:=U}=Identity,New) ->
+  case U:get(id) == New:get(id) of false -> ok;
+    true -> wf:user(Identity#{user=>New}) end.
 
 %--------------------------------------------------------------------------------
 % EVENT HANDLING
@@ -54,11 +59,15 @@ event({update,userInfo,User}) ->
              Firstname = wf:q(firstname),
              Lastname = wf:q(lastname), 
              {ok,U} = xuser:get(Id),
-             U1 = U:set(firstname,Firstname),
-             U2 = U1:set(lastname,Lastname),
-             case U2:save() of
-              {ok,_} -> cms_lib:notify(success,"Udpate profile", "done.");
-              _ -> cms_lib:notify(success,"Udpate profile", "done.")
+             case {Firstname,Lastname} of
+                {<<>>,<<>>} -> cms_lib:notify(error,"error udpate profile", "empty fields"); 
+                _ ->  U1 = U:set(firstname,Firstname),
+                      U2 = U1:set(lastname,Lastname),
+                      case catch U2:save() of
+                        {ok,New} -> update_identity(Identity,New), 
+                          cms_lib:notify(success,"Udpate profile", "done.");
+                        Err -> cms_lib:notify(error,"Error udpate profile", wf:to_list(Err) )
+                      end
              end;
     false -> cms_lib:notify(error,"Udpate profile", "not authorized.")
   end;

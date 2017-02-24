@@ -31,7 +31,7 @@ to_maps(R)   -> ?db:to_maps(R).
 to_json(R)   -> ?db:to_json(R).
 
 prepare_json(L) -> prepare_json(L,[]).
-prepare_json([],Acc)    -> Acc;
+prepare_json([],Acc) -> Acc;
 prepare_json([{K,undefined}|T],Acc) -> prepare_json(T,[{K,<<>>}]++Acc);
 prepare_json([{K,V}|T],Acc) -> prepare_json(T,[{K,V}]++Acc).
 
@@ -48,13 +48,15 @@ before_create(R) ->
       {Hmac, Salt, Iterations, DerivedLength} = Cfg:get(value),
       {ok,Key} = pbkdf2:pbkdf2(Hmac, Password, Salt, Iterations, DerivedLength),
       R1 = R:set(password,Key),
-      %io:format("Before Create ~p~n",[R1]),
       {ok, R1}
   end.
 
 before_update(Old,New) -> 
-  io:format("Diff ~p~n",[?db:diff(Old,New)]),
-  {ok, New}.
+  case ?db:diff(Old,New) of
+    [] -> {error, nodifference};
+     Diff -> io:format("Diff ~p~n",[Diff]),
+             {ok,New} 
+  end.
 
 save(R)    -> ?db:save(R).
 

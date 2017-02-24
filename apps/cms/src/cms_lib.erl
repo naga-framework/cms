@@ -10,6 +10,14 @@
                "Bootstrap Admin Template, powered by "
                "<a href='http://github.com/naga-framework/naga'>naga-framework</a>").
 
+notify(Type,Title,Msg) -> 
+  gentelella:pnotify(Type,Title,Msg),
+  ok.
+
+redirect(Sec,Redirect) ->
+  wf:wire(wf:f("setTimeout(function(){window.location='~s';}, ~B);",
+          [Redirect,1000*Sec])). 
+
 bindings(Identity, VendorsCSS, VendorsJS) ->               
   CSS = gentelella:vendors(css,VendorsCSS),
   JS  = gentelella:vendors(js,VendorsJS),

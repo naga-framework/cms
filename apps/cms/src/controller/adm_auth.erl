@@ -83,13 +83,6 @@ iforgot(<<"GET">>, [<<"password">> =Type], #{'_base_url' := BaseUrl})   ->
 %--------------------------------------------------------------------------------
 % HELPER
 %--------------------------------------------------------------------------------
-notify(Type,Title,Msg) -> 
-  gentelella:pnotify(Type,Title,Msg),
-  ok.
-
-redirect(Sec,Redirect) ->
-  wf:wire(wf:f("setTimeout(function(){window.location='~s';}, ~B);",
-          [Redirect,1000*Sec])). 
 
 error_msg({invalid,user}) -> "invalid user.";
 error_msg({invalid,credential}) -> "invalid credential.";
@@ -108,9 +101,9 @@ event(register) ->
                         end,[],[email,username,password]),
   User    = xuser:new(Params),
   case User:save() of
-   {ok, U} -> notify(success,"Register", "you will be redirected in few second."),
-              redirect(2,"/admin");
-   Err     -> notify(error,"Register",error_msg(Err))
+   {ok, U} -> cms_lib:notify(success,"Register", "you will be redirected in few second."),
+              cms_lib:redirect(2,"/admin");
+   Err     -> cms_lib:notify(error,"Register",error_msg(Err))
   end;
 event(Event) -> 
   wf:info(?MODULE,"Unknown Event: ~p~n",[Event]).

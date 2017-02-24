@@ -17,6 +17,146 @@ reverse(Variables, Options) ->
 % Variables are the passed-in vars in your template
 
 %------------------------------------------------------------------------------
+% Contact Info Form
+%------------------------------------------------------------------------------
+wsContactInfo(Vars,Opts) ->
+  User = proplists:get_value(user,Vars),
+  wf:render(form_contact_info(User)).
+form_contact_info(User) ->
+  Username  = proplists:get_value(username,User,[]),
+  Email     = proplists:get_value(email,User,[]),
+  Firstname = proplists:get_value(firstname,User,[]),
+  Lastname  = proplists:get_value(lastname,User,[]),
+  #form{class=["form-horizontal form-label-left"], body=[
+    #panel{class=["form-group"],body=[
+      #label{class=["control-label col-md-3 col-sm-3 col-xs-12"],body=["Username"]},
+      #panel{class=["col-md-9 col-sm-9 col-xs-12"], body=[
+        #input{id=username, type=text, class=["form-control"], 
+               value=[Username], data_fields=[{readonly,true}]}
+      ]}
+    ]},
+
+    #panel{class=["form-group"],body=[
+      #label{class=["control-label col-md-3 col-sm-3 col-xs-12"],body=["Firstname"]},
+      #panel{class=["col-md-9 col-sm-9 col-xs-12"], body=[
+        #input{id=firstname, type=text, class=["form-control"], value=[Firstname]}
+      ]}
+    ]},
+
+    #panel{class=["form-group"],body=[
+      #label{class=["control-label col-md-3 col-sm-3 col-xs-12"],body=["Lastname"]},
+      #panel{class=["col-md-9 col-sm-9 col-xs-12"], body=[
+        #input{id=lastname, type=text, class=["form-control"], value=[Lastname]}
+      ]}
+    ]},
+
+    #panel{class=["form-group"],body=[
+      #label{class=["control-label col-md-3 col-sm-3 col-xs-12"],body=["Email"]},
+      #panel{class=["col-md-9 col-sm-9 col-xs-12"], body=[
+        #input{id=email, type=text, class=["form-control"], value=[Email], data_fields=[{readonly,true}]}
+      ]}
+    ]},
+
+    #panel{class=[ln_solid]},
+    #panel{class=["form-group"],body=[
+      #panel{class=["col-md-9 col-sm-9 col-xs-12 col-md-offset-3"], body=[
+        #button{class=["btn btn-success submit"], 
+               postback={update,userInfo,User}, source=[firstname,lastname],
+               body=["update"]
+               }
+      ]}
+    ]}    
+  ]}.
+  
+%------------------------------------------------------------------------------
+% Change Password Form
+%------------------------------------------------------------------------------
+%%TODO: client validation before sending to backend
+wsChangePassword(Vars,Opts) ->
+  User = proplists:get_value(user,Vars),
+  wf:render(form_password(User)).
+form_password(User) ->
+  #form{class=["form-horizontal form-label-left"], body=[
+    #panel{class=["form-group"],body=[
+      #label{class=["control-label col-md-3 col-sm-3 col-xs-12"],body=["Password"]},
+      #panel{class=["col-md-9 col-sm-9 col-xs-12"], body=[
+        #input{id=password, type=password, class=["form-control"]}
+      ]}
+    ]},
+    #panel{class=["form-group"],body=[
+      #label{class=["control-label col-md-3 col-sm-3 col-xs-12"],body=["Confirm"]},
+      #panel{class=["col-md-9 col-sm-9 col-xs-12"], body=[
+        #input{id=confirm, type=password, class=["form-control"]}
+      ]}
+    ]},
+    #panel{class=[ln_solid]},
+    #panel{class=["form-group"],body=[
+      #panel{class=["col-md-9 col-sm-9 col-xs-12 col-md-offset-3"], body=[
+        #button{class=["btn btn-success submit"], 
+               postback={password_change,User}, source=[password,confirm],
+               body=["update"]
+               }
+      ]}
+    ]}    
+  ]}.
+%------------------------------------------------------------------------------
+% TOPNAV
+%------------------------------------------------------------------------------
+my_access(Vars,Opts) ->
+  Access = proplists:get_value(access,Vars,[]),
+  io:format("ACCESS ~p~n",[Access]),
+  wf:render(
+    [#h4{body=["Roles"]},
+     #ul{class=["list-unstyled user_data"],body=[
+      is_admin(Access),
+      is_author(Access),
+      is_modo(Access)
+     ]}
+    ]).
+      
+is_admin(P) -> case proplists:get_value(id_admin,P,false) of false ->[];
+    true -> #li{body=[
+                #button{type=button,
+                        class=["btn btn-round btn-primary btn-xs"], 
+                        body=["Admin"]}]} end.
+is_author(P) -> case proplists:get_value(is_author,P,false) of false ->[];
+    true -> #li{body=[
+                #button{type=button,
+                        class=["btn btn-round btn-primary btn-xs"], 
+                        body=["Author"]}]} end.
+
+is_modo(P) -> case proplists:get_value(is_moderator,P,false) of false ->[];
+    true -> #li{body=[
+                #button{type=button,
+                        class=["btn btn-round btn-primary btn-xs"], 
+                        body=["Moderator"]}]} end.
+
+
+my_avatar(Vars, Opts) ->
+  Avatar = proplists:get_value(avatar, Vars), 
+  io:format("Avatar ~p~n",[Avatar]),
+  wf:render(
+    case Avatar of
+      undefined ->
+        #panel{id= <<"crop-avatar">>, body=[
+          #link{postback={add,avatar},body=[
+            #image{class=["img-responsive avatar-view"], 
+                 src="/static/assets/images/image.png",
+                 alt="Avatar",title="Change the avatar" }
+          ]}
+        ]};
+      Avatar ->
+        #panel{id= <<"crop-avatar">>, body=[
+          #link{postback={update,avatar},body=[
+            #image{class=["img-responsive avatar-view"], 
+                 src="/static/assets/images/image.png",
+                 alt="Avatar",title="Change the avatar" }
+          ]}
+        ]}
+    end
+  ).
+
+%------------------------------------------------------------------------------
 % TOPNAV
 %------------------------------------------------------------------------------
 my_top_nav(Vars, Opts) ->
@@ -140,7 +280,8 @@ section_general()->
         ]}        
       ]},
       comments(),
-      profile(#i{class=["fa fa-user"]})
+      users()
+      %profile(#i{class=["fa fa-user"]})
     ]}
   ]}.
 dashboard() ->
@@ -168,6 +309,14 @@ comments() ->
     #link{ href="/admin/comments",body=[
       #i{class=["fa fa-comments"]},
       "Comments"
+    ]}
+  ]}.
+
+users() ->
+  #li{body=[
+    #link{ href="/admin/users",body=[
+      #i{class=["fa fa-users"]},
+      "Users"
     ]}
   ]}.
 

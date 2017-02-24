@@ -60,7 +60,12 @@ before_update(Old,New) ->
 
 save(R)    -> ?db:save(R).
 
-
+update_password(Pass,R) ->
+ {ok,Cfg} = config:get(password),
+ {Hmac, Salt, Iterations, DerivedLength} = Cfg:get(value),
+ {ok,Key} = pbkdf2:pbkdf2(Hmac, Pass, Salt, Iterations, DerivedLength),
+ R1 = R:set(password,Key),
+ R1:save().
 % -----------------------------------------------------------------------------
 % before/after[save] before/after[update] before/after[delete]
 % -----------------------------------------------------------------------------

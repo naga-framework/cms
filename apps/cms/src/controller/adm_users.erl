@@ -65,7 +65,7 @@ event({update,userInfo,User}) ->
                       U2 = U1:set(lastname,Lastname),
                       case catch U2:save() of
                         {ok,New} -> update_identity(Identity,New), 
-                          cms_lib:notify(success,"Udpate profile", "done.");
+                          cms_lib:notify(success,"Udpate profile", "profile updated.");
                         Err -> cms_lib:notify(error,"Error udpate profile", wf:to_list(Err) )
                       end
              end;
@@ -73,13 +73,25 @@ event({update,userInfo,User}) ->
   end;
 
 
-event({change,password,User}) -> 
-  io:format("USER ~p",[User]),
-  Password = wf:q(password),
-  Confirm = wf:q(confirm),
-  #{user := U} = wf:user(), 
-  cms_lib:notify(error,"Change password", "not yet implemented.");
-
+event({change,password,User}) ->
+  Identity = wf:user(),
+  case access(Identity,User) of
+    true ->  io:format("USER ~p",[User]),
+             Password = wf:q(password),
+             Confirm = wf:q(confirm),
+             case Password =:= Confirm of
+              true -> Id = proplists:get_value(id,User),
+                      {ok,U} = xuser:get(Id),
+                      case catch U:update_password(Password) of
+                        {ok,New} -> update_identity(Identity,New),  
+                          cms_lib:notify(success,"Change password", "password updated.");
+                        Err -> cms_lib:notify(error,"Error change password", wf:to_list(Err))
+                      end;
+              false-> cms_lib:notify(error,"Change password", "doesn't match.")
+             end;
+             
+    false -> cms_lib:notify(error,"Udpate password", "not authorized.")
+  end;
 
 event(Event) -> 
   wf:info(?MODULE,"Unknown Event: ~p~n",[Event]).

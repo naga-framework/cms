@@ -14,6 +14,9 @@ attribute_idx(_)   -> ?db:attribute_idx(?model).
 
 attributes(R)-> ?db:attributes(R).
 
+public() -> attribute_names() -- 
+  [container,feed_id,prev,next,feeds,password,avatar].
+
 get(Email) when is_list(Email)-> 
   case kvs:index(?model,email,Email) of
     []  ->{error,notfound};
@@ -34,6 +37,35 @@ prepare_json(L) -> prepare_json(L,[]).
 prepare_json([],Acc) -> Acc;
 prepare_json([{K,undefined}|T],Acc) -> prepare_json(T,[{K,<<>>}]++Acc);
 prepare_json([{K,V}|T],Acc) -> prepare_json(T,[{K,V}]++Acc).
+
+% -----------------------------------------------------------------------------
+% extract string
+% -----------------------------------------------------------------------------
+
+% -----------------------------------------------------------------------------
+% render
+% -----------------------------------------------------------------------------
+render(avatar,undefined)    -> "<a class=\"user-profile\">"
+                               "<img src=\"/static/assets/images/image.png\">"
+                               "</a>";
+render(avatar,V)            -> wf:f("<img src=\"~s\">",[V]);
+render(_,undefined)         -> <<>>;
+render(id,V)                -> V;
+render(register_date,V)     -> V;
+render(firstname,V)         -> V;
+render(lastname,V)          -> V;
+render(username,V)          -> V;
+render(email,V)             -> V;
+render(password,V)          -> "**********";
+render(field,id)            -> "Id";
+render(field,register_date) -> "Register date";
+render(field,firstname)     -> "Firstname";
+render(field,lastname)      -> "Lastname";
+render(field,username)      -> "Username";
+render(field,email)         -> "Email";
+render(field,avatar)        -> "Avatar";
+render(field,password)      -> "Password";
+render(field,_)             -> "".
 
 % -----------------------------------------------------------------------------
 % before/after[save] before/after[update] before/after[delete]
@@ -79,5 +111,39 @@ check_credential(EnteredPassword,R) ->
     {ok, Key} -> true;
     _ -> false end.
 
+% -----------------------------------------------------------------------------
+% validations test before storing record.
+% -----------------------------------------------------------------------------
+validate(R) -> [Msg||{Test,Msg} <- validation_tests(R), not Test()].
+validation_tests(R) -> 
+  [{fun() -> notnull(R:get(email))  end,"Email required"},
+   {fun() -> is_email(R:get(email)) end,"Email invalid"}].
 
 
+notnull([]) -> false;
+notnull(<<>>) -> false;
+notnull(nill) -> false;
+notnull(undefined) -> false;
+notnull(_) -> true.
+
+%from zotonic
+is_email(Email) ->
+    case re:run(Email, [$^|re()]++"$", [extended]) of
+        nomatch   -> false;
+        {match,_} -> true
+    end.
+
+re() ->
+    "(
+            (\"[^\"\\f\\n\\r\\t\\v\\b]+\")
+        |   ([\\w\\!\\#\\$\\%\\&\\'\\*\\+\\-\\~\\/\\^\\`\\|\\{\\}]+
+                (\\.[\\w\\!\\#\\$\\%\\&\\'\\*\\+\\-\\~\\/\\^\\`\\|\\{\\}]+)*
+            )
+    )
+    @
+    (
+        (
+            ([A-Za-z0-9\\-])+\\.
+        )+
+        [A-Za-z\\-]{2,}
+    )".  

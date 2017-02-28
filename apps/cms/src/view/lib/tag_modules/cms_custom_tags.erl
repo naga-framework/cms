@@ -17,6 +17,35 @@ reverse(Variables, Options) ->
 % Variables are the passed-in vars in your template
 
 %------------------------------------------------------------------------------
+% wsKeytable
+%------------------------------------------------------------------------------
+wsKeytable(Vars,Opts) ->
+ Rows = proplists:get_value(rows,Vars),
+ case Rows of
+  [] -> [];
+  _  -> Type = element(1,hd(Rows)),
+        Headers = Type:public(),
+        TabId = wf:temp_id(),
+
+        TBody = lists:foldr(fun(Row, Acc) ->              
+                    [#tr{cells=lists:foldr(fun(X,Bcc)->
+                                            lists:foldr(fun(F,Ccc)->
+                                                          [#td{body=Type:render(F,X:get(F))}|Ccc]
+                                                        end,[],Headers)++Bcc
+                                           end,[],Rows)}|Acc] end, [], Rows),
+
+        THead = lists:foldr(fun(X,Acc) -> 
+                              [#th{body=Type:render(field,X)}|Acc] 
+                            end, [], Headers),
+        wf:render(
+        #table{id=TabId, 
+               class=["table table-striped table-bordered"],  
+               actions=wf:f("$('#~s').DataTable({keys:true});",[TabId]), 
+               header=THead, 
+               body=#tbody{body=TBody}}) 
+ end.
+
+%------------------------------------------------------------------------------
 % Contact Info Form
 %------------------------------------------------------------------------------
 wsContactInfo(Vars,Opts) ->
@@ -284,7 +313,7 @@ section_general()->
           add_article()
         ]}        
       ]},
-      comments(),
+      %comments(),
       users()
       %profile(#i{class=["fa fa-user"]})
     ]}

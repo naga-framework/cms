@@ -16,6 +16,7 @@ attribute_idx(_)   -> ?db:attribute_idx(?MODULE).
 
 attributes(R)-> ?db:attributes(R).
 
+public() -> [id,created,modified,publish_date,status,title,author].
 
 get(F,R)     -> ?db:get_value(F,R).
 set(F,V,R)   -> ?db:set_value(F,V,R).
@@ -39,6 +40,15 @@ save(R)    -> ?db:save(R).
 
 
 % -----------------------------------------------------------------------------
-% create
+% render
 % -----------------------------------------------------------------------------
+% [id,version,container,feed_id,prev,next,feeds,guard,etc,
+%  created,modified,publish_date,status,title,top_title,
+%  sub_title,description,text,ps,media,views,referrers]
+render(_,undefined)         -> <<>>;
+render(_,V)                 -> V;
 
+render(field,publish_date)  -> "Publish date";
+render(field,sub_title)     -> "Subtitle";
+render(field,top_title)     -> "Heading";
+render(field,F)             -> wf:to_list(F).

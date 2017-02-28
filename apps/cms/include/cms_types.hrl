@@ -7,6 +7,7 @@
 -type fk_user()     :: foreign_key().
 -type fk_page()     :: foreign_key().
 -type fk_product()  :: foreign_key().
+-type fk_author()   :: foreign_key().
 
 -type mime()        :: binary(). %%
 -type filesize()    :: integer().

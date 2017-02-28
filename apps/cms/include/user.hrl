@@ -5,7 +5,7 @@
 -include("cms_types.hrl").
 
 -define(xuser_keys,[email]).
--record(xuser, {?ITERATOR(feed, true),
+-record(xuser, {?ITERATOR(feed),
            register_date  = 0   :: seconds(),
            avatar         = undefined :: fk(),
            firstname      = []  :: string(),

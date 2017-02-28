@@ -5,148 +5,81 @@
 -define(THOUSAND, 1000).
 -define(MILLION, ?THOUSAND*?THOUSAND).
 
+hook_type(R) ->
+  Id = R:get(id),
+  Type = element(1,R),
+  case Id == [] of
+    true -> NId = kvs:next_id(Type,1),
+            NR = R:set(id,NId),
+            {create, Type, NR};
+    false ->
+            {update, Type, R}
+  end.
 
-% paginate(_, Model, Conditions, Opts) ->
-%     {Pattern, _Filter} = build_query(Model, Conditions), %% don't know if _Filter is usefull here ??
-%     Page       = proplists:get_value(page, Opts, 1),
-%     PageSize   = proplists:get_value(page_size, Opts, ?DEFAULT_PAGE_SIZE),
-%     Offset     = PageSize * (Page - 1),
-%     Total      = boss_db:count(Model, Conditions),
-%     TotalPages = (Total div PageSize) + (case Total rem PageSize of
-%                                              0 -> 0;
-%                                              _ -> 1
-%                                          end),
-%     MatchSpec = [{list_to_tuple([Model|Pattern]), [], ['$_']}],
-%     case limit(Model, Offset, PageSize, MatchSpec) of
-%         {atomic, Result} -> 
-%             {Page, TotalPages, Total, Result};
-        
-%         {aborted, Reason} -> 
-%             {error, Reason}
-%     end.
+save(Record) -> 
+  save(Record, validate_record(Record)).
 
-% limit (Tab, Offset, Number, MatchSpec) ->
-%     Fun = fun() ->
-%                   seek (Offset,
-%                         Number,
-%                         mnesia:select (Tab,
-%                                        MatchSpec,
-%                                        Number,
-%                                        read)
-%                        ) 
-%           end,
-%     mnesia:transaction(Fun). 
+save(Record, ok) -> 
+  {Hook, Type, R} = hook_type(Record),
+  %io:format("isNew ~p : ~p~n",[Hook,R]),
+  HookResult = ret(hook({before,Hook},Type,R),R),
+  %io:format("HookResult ~p~n",[HookResult]),        
+  case HookResult of
+      {ok, R1} -> 
+          case save_record(Hook, R1) of
+            {ok, Saved} -> 
+              ret(hook({'after',Hook},Type,Saved),Saved);
+            Err -> Err
+          end;
+      Err -> Err
+  end;
+save(_, Errors) -> Errors. 
 
+ret(ok,R) -> {ok,R};
+ret({ok,R},_) -> {ok,R};
+ret({error,_}=Err,_) -> Err.
 
-% seek (_Offset, _Number, '$end_of_table') ->
-%   [];
-% seek (Offset, Number, X) when Offset =< 0 ->
-%     read (Number, X, []);
-% seek (Offset, Number, { Results, Cont }) ->
-%     NumResults = length (Results),
-%     case Offset > NumResults of
-%         true ->
-%             seek (Offset - NumResults, Number, mnesia:select (Cont));
-%         false ->
-%             { _, DontDrop } = lists:split (Offset, Results),
-%             Keep = lists:sublist (DontDrop, Number),
-%             read (Number - length (Keep), mnesia:select (Cont), [ Keep ])
-%     end.
+hook({before,update},Type,R)->
+  case erlang:function_exported(Type, before_update, 2) of
+    true -> {ok,O} = Type:get(R:get(id)),
+            ret(Type:before_create(O,R),R);
+    false-> {ok,R}
+  end;
+hook({A,B},Type,R)->
+  Fun = wf:atom([A,B]),
+  case erlang:function_exported(Type, Fun, 1) of
+    true -> ret(Type:Fun(R),R);
+    false-> {ok,R}
+  end.
 
-% read (Number, _, Acc) when Number =< 0 ->
-%     lists:foldl (fun erlang:'++'/2, [], Acc);
-% read (_Number, '$end_of_table', Acc) ->
-%     lists:foldl (fun erlang:'++'/2, [], Acc);
-% read (Number, { Results, Cont }, Acc) ->
-%     NumResults = length (Results),
-%     case Number > NumResults of
-%         true ->
-%             read (Number - NumResults, mnesia:select (Cont), [ Results | Acc ]);
-%         false ->
-%             { Keep, _ } = lists:split (Number, Results),
-%             lists:foldl (fun erlang:'++'/2, Keep, Acc)
-%     end.
+delete(R) ->
+ HookResult = ret(hook({before,delete},Type,R),R),
+  case HookResult of
+      {ok, R1} -> 
+        case delete_record(Type,R1:get(id)) of
+          ok -> ret(hook({'after',delete},Type,R1),R1);
+          Err -> Err
+        end;
+      Err -> Err
+  end;
+save(_, Errors) -> Errors.
 
+%% add new record
+save_record(create, R) -> kvs:add(R);
+%% update a record
+save_record(update, R) -> case kvs:put(R) of 
+                          ok -> kvs:get(element(1,R),element(2,R));
+                          Err -> Err end.
 
-run_before_hooks(Record, OldRecord, true) ->
-    run_hooks(Record, element(1, Record), before_create);
-run_before_hooks(Record, OldRecord, false) ->
-    run_hooks(OldRecord, Record, element(1, Record), before_update).
-
-run_after_hooks(_UnsavedRecord, SavedRecord, true) ->
-    %boss_news:created(SavedRecord:id(), SavedRecord:attributes()),
-    run_hooks(SavedRecord, element(1, SavedRecord), after_create);
-run_after_hooks(UnsavedRecord, SavedRecord, false) ->
-    %boss_news:updated(SavedRecord:id(), UnsavedRecord:attributes(), SavedRecord:attributes()),
-    run_hooks(UnsavedRecord, SavedRecord, element(1, SavedRecord), after_update).
-
-run_before_delete_hooks(Record) ->
-    run_hooks(Record, element(1, Record), before_delete).
-
-run_hooks(Record, Type, Function) ->
-    case erlang:function_exported(Type, Function, 1) of
-        true  -> case catch Record:Function() of 
-                  {'EXIT',Err} -> {error,hook_error(Err)}; E->E end;
-        false -> ok
-    end.
-
-run_hooks(OldRecord, Record, Type, Function) ->
-    case erlang:function_exported(Type, Function, 2) of
-        true  ->
-            Record:Function(OldRecord);
-        false ->
-            %% As for backward compatibilities check if a old *_update/1 function exists
-            run_hooks(Record, Type, Function)
-    end.
+delete_record(R) -> 
 
 hook_error({undef,[{_,set_value,[_,Field,_,_R],_}|_]}) -> {unknow_field,Field};
 hook_error(Err) -> Err.
 
-save(Record) -> save(Record, validate_record(Record)).
-save(Record, ok) ->
-  RecordId = Record:get(id),
-  Type = element(1,Record),
-  {IsNew, OldRecord} = if
-      RecordId =:= undefined ->
-          Id = kvs:next_id(Type,1),
-          New = Record:set(id,Id),
-          {true, New};
-      true ->
-          case Type:get(RecordId) of
-              {error, _Reason} -> {true, Record};
-              undefined        -> {true, Record};
-              {ok, FoundOldRecord}   -> {false, FoundOldRecord}
-          end
-  end,
-  % Action dependent valitation
-  %io:format("isNew ~p : ~p~n",[IsNew,OldRecord]),
-  case validate_record(OldRecord, IsNew) of
-      ok ->
-          HookResult = case run_before_hooks(Record, OldRecord, IsNew) of
-                         ok -> {ok, OldRecord};
-                         {ok, Record1} -> {ok, Record1};
-                         {error, Reason} -> {error, Reason}
-                       end,
-          %io:format("HookResult ~p~n",[HookResult]),        
-          case HookResult of
-              {ok, PossiblyModifiedRecord} ->
-                  case save_record(IsNew, PossiblyModifiedRecord) of
-                    {ok, SavedRecord} ->
-                        run_after_hooks(OldRecord, SavedRecord, IsNew),
-                        {ok, SavedRecord};
-                    Err -> Err
-                  end;
-              Err -> Err
-          end;
-      Err -> Err
-  end.
 
 validate_record(Record) ->
     Type = element(1, Record),
-    % Errors1 = case validate_record_types(Record) of
-    %     ok -> [];
-    %     {error, Errors} -> Errors
-    % end,
+
     Errors1 = [],
     Errors2 = case Errors1 of
         [] ->
@@ -161,80 +94,24 @@ validate_record(Record) ->
         _ -> {error, Errors2}
     end.
 
-validate_record(Record, IsNew) ->
-    Type = element(1, Record),
-    Action = case IsNew of
-                   true -> on_create;
-                   false -> on_update
-               end,
-    Errors = case erlang:function_exported(Type, validation_tests, 2) of
-                 % makes Action optional
-                 true -> [String || {TestFun, String} <- try Record:validation_tests(Action)
-                                                         catch error:function_clause -> []
-                                                         end,
-                                    not TestFun()];
-                 false -> []
-             end,
-    case length(Errors) of
-        0 -> ok;
-        _ -> {error, Errors}
-    end.
-
-% validate_record_types(Record) ->
-%     Errors = lists:foldl(fun
-%             ({Attr, Type}, Acc) ->
-%                 case Attr of
-%                   id -> Acc;
-%                   _  ->
-%                     Data = Record:Attr(),
-%                     GreatSuccess = case {Data, Type} of
-%                         {undefined, _} ->
-%                             true;
-%                         {Data, string} when is_list(Data) ->
-%                             true;
-%                         {Data, binary} when is_binary(Data) ->
-%                             true;
-%                         {Data, uuid} when is_list(Data) ->
-%                             true;
-%                         {{{D1, D2, D3}, {T1, T2, T3}}, datetime} when is_integer(D1), is_integer(D2), is_integer(D3),
-%                                                                       is_integer(T1), is_integer(T2), is_integer(T3) ->
-%                             true;
-%                         {{D1, D2, D3}, date} when is_integer(D1), is_integer(D2), is_integer(D3) ->
-%                             true;
-%                         {Data, integer} when is_integer(Data) ->
-%                             true;
-%                         {Data, float} when is_float(Data) ->
-%                             true;
-%                         {Data, boolean} when is_boolean(Data) ->
-%                             true;
-%                         {{N1, N2, N3}, timestamp} when is_integer(N1), is_integer(N2), is_integer(N3) ->
-%                             true;
-%                         {Data, atom} when is_atom(Data) ->
-%                             true;
-%                         {_Data, Type} ->
-%                             true
-%                     end,
-%                     if
-%                         GreatSuccess ->
-%                             Acc;
-%                         true ->
-%                             [lists:concat(["Invalid data type for ", Attr])|Acc]
-%                     end
-%                   end
-%         end, [], Record:attribute_types()),
-%     case Errors of
-%         [] -> ok;
+% validate_record(Record, IsNew) ->
+%     Type = element(1, Record),
+%     Action = case IsNew of
+%                    true -> on_create;
+%                    false -> on_update
+%                end,
+%     Errors = case erlang:function_exported(Type, validation_tests, 2) of
+%                  % makes Action optional
+%                  true -> [String || {TestFun, String} <- try Record:validation_tests(Action)
+%                                                          catch error:function_clause -> []
+%                                                          end,
+%                                     not TestFun()];
+%                  false -> []
+%              end,
+%     case length(Errors) of
+%         0 -> ok;
 %         _ -> {error, Errors}
 %     end.
-
-%% add new record
-save_record(true,  R) -> kvs:add(R);
-%% update a record
-save_record(false, R) -> case kvs:put(R) of 
-                          ok -> kvs:get(element(1,R),element(2,R));
-                          Err -> Err end.
-
-
 
 
 find(Type, Id) when is_integer(Id) -> kvs:get(Type,Id);
@@ -361,10 +238,6 @@ build_conditions1([First|Rest], Pattern, Filter) ->
     build_conditions1(Rest, Pattern, [First|Filter]).
 
 
-
-
-
-
 to_type(Val, undefined)                    -> Val;
 to_type(Val, integer) when is_integer(Val) -> Val;
 to_type(Val, integer) when is_list(Val)    -> list_to_integer(Val);
@@ -401,12 +274,10 @@ to_type({{D1, D2, D3}, {T1, T2, T3}} = Val, datetime)
   -> Val;
 
 to_type({D1, D2, D3} = Val, date) 
-  when is_integer(D1), is_integer(D2), is_integer(D3)
-  -> Val;
+  when is_integer(D1), is_integer(D2), is_integer(D3) -> Val;
 
 to_type({date, {D1, D2, D3} = Val}, date) 
-  when is_integer(D1), is_integer(D2), is_integer(D3)
-  -> Val;
+  when is_integer(D1), is_integer(D2), is_integer(D3) -> Val;
 
 to_type(<<"1">>,     boolean) -> true;
 to_type(<<"0">>,     boolean) -> false;
@@ -420,7 +291,6 @@ to_type(1,           boolean) -> true;
 to_type(0,           boolean) -> false;
 to_type(true,        boolean) -> true;
 to_type(false,       boolean) -> false.
-
 
 conditions(Conditions) -> conditions(Conditions, []).
 conditions([], Acc)    -> lists:reverse(Acc);

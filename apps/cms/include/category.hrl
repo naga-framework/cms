@@ -5,7 +5,7 @@
 -include("cms_types.hrl").
 
 -define(category_keys,[path]).
--record(category, {?ITERATOR(feed, true),
+-record(category, {?ITERATOR(feed),
            created        = 0  :: seconds(),
            modified       = 0  :: seconds(),
            path           = [] :: path(),

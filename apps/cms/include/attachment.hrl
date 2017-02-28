@@ -5,7 +5,7 @@
 -include("cms_types.hrl").
 
 -define(attachment_keys,[owner_id,md5]).
--record(attachment, {?ITERATOR(feed, true),
+-record(attachment, {?ITERATOR(feed),
                       created        = 0    :: seconds(),
                       path           = []   :: list(), 
                       filename       = []   :: filename(),

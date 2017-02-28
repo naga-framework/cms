@@ -9,19 +9,26 @@
 -include_lib("n2o/include/wf.hrl").
 -include_lib("naga/include/naga.hrl").
 -include_lib("cms/include/cms.hrl").
-
+-include_lib("kvs/include/feed.hrl").
 %--------------------------------------------------------------------------------
 % INDEX
 %--------------------------------------------------------------------------------
-index(<<"GET">>, _, _)   -> 
-  {501, <<"not implemented">>, []}.
+index(<<"GET">>, _, #{identity:=Identity} = Ctx) -> 
+  io:format("Identity ~p~n",[Identity]),
+  VendorsCSS = [bootstrap3,fontawesome,
+                nprogress,icheck,datatables,
+                pnotify,gentelella],              
+  VendorsJS = [jquery,bootstrap3,fastclick,nprogress,icheck,
+               datatables,jszip,pdfmake,pnotify,starrr,gentelella],
+  Bindings = cms_lib:bindings(Identity,VendorsCSS,VendorsJS),
 
+  Users = kvs:entries(kvs:get(feed,xuser), xuser, undefined),
+
+  {ok, Bindings ++ [{users, Users}]}.
 %--------------------------------------------------------------------------------
 % PROFILE
 %--------------------------------------------------------------------------------
-profile(<<"GET">>, _, #{identity:=Identity} = Ctx)   -> 
-
-  io:format("Identity ~p~n",[Identity]),
+profile(<<"GET">>, _, #{identity:=Identity} = Ctx) -> 
   VendorsCSS = [bootstrap3,fontawesome,
                 nprogress,icheck,prettify,select2,switchery,starrr,
                 pnotify,gentelella],
@@ -33,6 +40,22 @@ profile(<<"GET">>, _, #{identity:=Identity} = Ctx)   ->
   Bindings = cms_lib:bindings(Identity,VendorsCSS,VendorsJS),
   {ok, Bindings}.
       
+
+seek(Type, FeedId, {Page,PageSize}) when Page > 0, PageSize > 0 ->
+  case kvs:get(feed, FeedId) of 
+    {ok, Feed} -> seek(Type, FeedId, Feed, PageSize, (Page-1) * PageSize, Page* PageSize);
+    _ -> [] end.
+
+seek(Type, _, #feed{count=Total} = Feed, PageSize, Start, ___) when Start >= Total -> [];
+seek(Type, _, #feed{count=Total} = Feed, PageSize, 0, End) ->
+     kvs:entries(Feed, Type, PageSize);
+seek(Type, _, #feed{count=Total} = Feed, PageSize, Start, End) ->
+     %wf:info(?MODULE, "PageSize ~p, Start ~p, End ~p~n",[PageSize, Start, End]),
+     L = kvs:entries(Feed, Type, Start+1),
+     %wf:info(?MODULE, "L ~p~n",[L]),
+     First = lists:nth(1,L),
+     %wf:info(?MODULE, "First ~p~n",[First]),
+     kvs:entries(Feed#feed{top=element(2,First)}, Type, PageSize).
 
 %--------------------------------------------------------------------------------
 % ACCESS

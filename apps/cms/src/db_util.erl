@@ -42,7 +42,7 @@ ret({error,_}=Err,_) -> Err.
 hook({before,update},Type,R)->
   case erlang:function_exported(Type, before_update, 2) of
     true -> {ok,O} = Type:get(R:get(id)),
-            ret(Type:before_create(O,R),R);
+            ret(Type:before_update(O,R),R);
     false-> {ok,R}
   end;
 hook({A,B},Type,R)->
@@ -53,6 +53,7 @@ hook({A,B},Type,R)->
   end.
 
 delete(R) ->
+Type = element(1,R),
  HookResult = ret(hook({before,delete},Type,R),R),
   case HookResult of
       {ok, R1} -> 
@@ -61,8 +62,7 @@ delete(R) ->
           Err -> Err
         end;
       Err -> Err
-  end;
-save(_, Errors) -> Errors.
+  end.
 
 %% add new record
 save_record(create, R) -> kvs:add(R);
@@ -71,7 +71,8 @@ save_record(update, R) -> case kvs:put(R) of
                           ok -> kvs:get(element(1,R),element(2,R));
                           Err -> Err end.
 
-delete_record(R) -> 
+delete_record(Type,Id) -> kvs:delete(Type, Id).
+
 
 hook_error({undef,[{_,set_value,[_,Field,_,_R],_}|_]}) -> {unknow_field,Field};
 hook_error(Err) -> Err.

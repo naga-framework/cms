@@ -12,11 +12,7 @@
            publish_date   = 0     :: time(), %
            status         = draft :: draft | proposed | published | refused | dustbin,
            title          = []    :: string(),
-           top_title      = []    :: string(),
-           sub_title      = []    :: string(),
-           description    = []    :: string(),
            text           = []    :: string(),
-           ps             = []    :: string(), %% post-scriptum
            media          = []    :: list(),   %% list of media
            views          = 0     :: integer(),
            referrers      = []    :: list() 

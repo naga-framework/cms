@@ -22,7 +22,7 @@
 ,{ "/admin/categories",   [{app,cms},{ctrl,adm_categories},{action,index}],[]}
 
 ,{ "/admin/articles",     [{app,cms},{ctrl,adm_articles}  ,{action,index}],[]}
-,{ "/admin/article/[...]",[{app,cms},{ctrl,adm_articles}  ,{action,index}],[]}
+,{ "/admin/article/[...]",[{app,cms},{ctrl,adm_articles}  ,{action,article}],[]}
 
 ,{ "/admin/groups",       [{app,cms},{ctrl,adm_groups}    ,{action,index}],[]}
 

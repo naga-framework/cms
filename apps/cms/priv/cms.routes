@@ -34,6 +34,7 @@
 ,{ "/admin/error/404",    [{app,cms},{ctrl,adm_error}     ,{action,'404'}],[]}
 ,{ "/admin",              [{app,cms},{ctrl,adm_dashboard} ,{action,index}],[]}
 
+,{ "/stream",             [{app,cms},{ctrl,cms_index} ,{action,stream}],[]}
 
 ,{ "/page/[...]",         [{app,cms},{ctrl,cms_page} ,{action,index}],[]}
 ,{ "/category/[...]",     [{app,cms},{ctrl,cms_category} ,{action,index}],[]}

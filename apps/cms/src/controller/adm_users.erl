@@ -11,7 +11,7 @@
 -include_lib("cms/include/cms.hrl").
 -include_lib("kvs/include/feed.hrl").
 %--------------------------------------------------------------------------------
-% INDEX
+% INDEX CONTROLLER
 %--------------------------------------------------------------------------------
 index(<<"GET">>, _, #{identity:=Identity} = Ctx) -> 
   io:format("Identity ~p~n",[Identity]),
@@ -21,12 +21,13 @@ index(<<"GET">>, _, #{identity:=Identity} = Ctx) ->
   VendorsJS = [jquery,bootstrap3,fastclick,nprogress,icheck,
                datatables,jszip,pdfmake,pnotify,starrr,gentelella],
   Bindings = cms_lib:bindings(Identity,VendorsCSS,VendorsJS),
-
+  
+  %%FIXME:pagination?
   Users = kvs:entries(kvs:get(feed,xuser), xuser, undefined),
-
   {ok, Bindings ++ [{users, Users}]}.
+
 %--------------------------------------------------------------------------------
-% PROFILE
+% PROFILE CONTROLLER
 %--------------------------------------------------------------------------------
 profile(<<"GET">>, _, #{identity:=Identity} = Ctx) -> 
   VendorsCSS = [bootstrap3,fontawesome,
@@ -40,22 +41,6 @@ profile(<<"GET">>, _, #{identity:=Identity} = Ctx) ->
   Bindings = cms_lib:bindings(Identity,VendorsCSS,VendorsJS),
   {ok, Bindings}.
       
-
-seek(Type, FeedId, {Page,PageSize}) when Page > 0, PageSize > 0 ->
-  case kvs:get(feed, FeedId) of 
-    {ok, Feed} -> seek(Type, FeedId, Feed, PageSize, (Page-1) * PageSize, Page* PageSize);
-    _ -> [] end.
-
-seek(Type, _, #feed{count=Total} = Feed, PageSize, Start, ___) when Start >= Total -> [];
-seek(Type, _, #feed{count=Total} = Feed, PageSize, 0, End) ->
-     kvs:entries(Feed, Type, PageSize);
-seek(Type, _, #feed{count=Total} = Feed, PageSize, Start, End) ->
-     %wf:info(?MODULE, "PageSize ~p, Start ~p, End ~p~n",[PageSize, Start, End]),
-     L = kvs:entries(Feed, Type, Start+1),
-     %wf:info(?MODULE, "L ~p~n",[L]),
-     First = lists:nth(1,L),
-     %wf:info(?MODULE, "First ~p~n",[First]),
-     kvs:entries(Feed#feed{top=element(2,First)}, Type, PageSize).
 
 %--------------------------------------------------------------------------------
 % ACCESS

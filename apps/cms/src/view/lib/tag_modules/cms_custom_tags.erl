@@ -169,31 +169,29 @@ my_avatar(Vars, Opts) ->
   
 my_avatar(Vars,Opts,undefined) ->
   #panel{id= <<"crop-avatar">>, class=["image view view-first"],body=[
-    %#link{postback={add,avatar},body=[
       #image{class=["img-responsive avatar-view"],
            style="width: 100%; display: block;", 
            src="/static/assets/images/image.png",
            alt="Avatar",title="Change the avatar" },
       #panel{class=[mask], 
-        style="width: 181.500px; height:150.484px; display: block;", body=[
+        style="width: 100%; height:100%; display: block;", body=[
         #p{body=["change avatar"]},
         %#panel{class=["tools tools-bottom"], body=[
-          #link{class=["btn btn-success submit"],postback={avatar,update}, body=[
+          #link{class=["btn btn-success submit"],
+                postback={avatar,update}, body=[
             #i{class=["fa fa-upload"]}
-          ]},
-          #link{class=["btn btn-danger submit"],postback={avatar,delete}, body=[
-            #i{class=["fa fa-times"]}
-          ]}     
+          ]}
+          % #link{class=["btn btn-danger submit"],postback={avatar,delete}, body=[
+          %   #i{class=["fa fa-times"]}
+          % ]}     
         %]}
       ]}
-    %]}
   ]};
 
 my_avatar(Vars,Opts,Avatar) ->
   #panel{id= <<"crop-avatar">>, class=["image view view-first"], body=[
-    %#link{postback={update,avatar},body=[
       #image{class=["img-responsive avatar-view"],
-           style="width: 100%; display: block;",  
+           style="width: 100%; height:100%; display: block;",  
            src="/static/assets/images/image.png",
            alt="Avatar",title="Change the avatar" },
 
@@ -208,8 +206,6 @@ my_avatar(Vars,Opts,Avatar) ->
           ]}     
         ]}
       ]}
-
-    %]}
   ]}.
 
 

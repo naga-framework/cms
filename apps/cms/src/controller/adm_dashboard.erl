@@ -11,10 +11,9 @@
 -include("cms.hrl").
 
 %--------------------------------------------------------------------------------
-% CONTROLLER
+% INDEX CONTROLLER
 %--------------------------------------------------------------------------------
 index(<<"GET">>, _, #{identity:=Identity} = Ctx)   -> 
-  io:format("Identity ~p~n",[Identity]),
   VendorsCSS = [bootstrap3,fontawesome,
                 nprogress,icheck,progressbar,
                 jqvmap,moment,daterangepicker,
@@ -30,7 +29,7 @@ index(<<"GET">>, _, #{identity:=Identity} = Ctx)   ->
 
 
 %--------------------------------------------------------------------------------
-% EVENT HANDLING
+% EVENT HANDLING (ws)
 %--------------------------------------------------------------------------------        
 event(Event) -> 
   wf:info(?MODULE,"Unknown Event: ~p~n",[Event]).

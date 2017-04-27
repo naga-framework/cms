@@ -1,44 +1,29 @@
 [
-%% DISPATCH RULE: {"URL MATCH" , handler, opts()}
+
+%% STATIC FILES ROUTING
+%% ---------------------
 
   { "/favicon.ico",cowboy_static,{priv_file,cms,"static/favicon.ico"}}
-
- %,{ 404, [{application, cms },{controller, error}, {action, '404'}], []}
-
+ ,{ "/static/n2o/[...]",naga_static,{dir,"deps/n2o/priv",[{mimetypes,cow_mimetypes,all}]}}
  ,{ "/static/gentelella/[...]",
                       naga_static,
                       {dir,"deps/gentelella/priv",[{mimetypes,cow_mimetypes,all}]}}
- ,{ "/static/n2o/[...]",naga_static,{dir,"deps/n2o/priv",[{mimetypes,cow_mimetypes,all}]}}
  ,{ "/static/[...]",naga_static,{dir,"apps/cms/priv/static",[{mimetypes,cow_mimetypes,all}]}}
 
+%% ROUTING
+%% ---------------------
+%% see cms_adm/priv/cms_adm.routes
 
-%% url cms admin backend
+
+%% MVC CMS ROUTING
 %% ---------------------
 
-,{ "/admin/login",        [{app,cms},{ctrl,adm_auth}      ,{action,login}],[]} 
-,{ "/admin/logout",       [{app,cms},{ctrl,adm_auth}      ,{action,logout}],[]} 
-,{ "/admin/iforgot/[...]",[{app,cms},{ctrl,adm_auth}      ,{action,iforgot}],[]} 
-
-%,{ "/admin/categories",   [{app,cms},{ctrl,adm_categories},{action,index}],[]}
-
-%,{ "/admin/articles",     [{app,cms},{ctrl,adm_articles}  ,{action,index}],[]}
-%,{ "/admin/article/[...]",[{app,cms},{ctrl,adm_articles}  ,{action,article}],[]}
-
-%,{ "/admin/groups",       [{app,cms},{ctrl,adm_groups}    ,{action,index}],[]}
-
-,{ "/admin/users",        [{app,cms},{ctrl,adm_users}     ,{action,index}],[]}
-,{ "/admin/profile",      [{app,cms},{ctrl,adm_users}     ,{action,profile}],[]} 
-
-%,{ "/admin/pages",        [{app,cms},{ctrl,adm_pages}     ,{action,index}],[]} 
-,{ "/admin/dashboard",    [{app,cms},{ctrl,adm_dashboard} ,{action,index}],[]}
-,{ "/admin/error/404",    [{app,cms},{ctrl,adm_error}     ,{action,'404'}],[]}
-,{ "/admin",              [{app,cms},{ctrl,adm_dashboard} ,{action,index}],[]}
-
-,{ "/stream",             [{app,cms},{ctrl,cms_index} ,{action,stream}],[]}
+ ,{ "/stream",             [{app,cms},{ctrl,cms_index} ,{action,stream}],[]}
 
 %,{ "/page/[...]",         [{app,cms},{ctrl,cms_page} ,{action,index}],[]}
 %,{ "/category/[...]",     [{app,cms},{ctrl,cms_category} ,{action,index}],[]}
 %,{ "/article/[...]",      [{app,cms},{ctrl,cms_article} ,{action,index}],[]}
-,{ "/[...]",              [{app,cms},{ctrl,cms_index} ,{action,index}],[]}
+
+ ,{ "/[...]",              [{app,cms},{ctrl,cms_index} ,{action,index}],[]}
 
 ].

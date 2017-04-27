@@ -2,6 +2,6 @@
   [{description, "cms"},
    {vsn, "v0.0.1"},
    {registered, []},
-   {applications, [kernel, stdlib, naga]},
+   {applications, [kernel, stdlib, naga, cms_adm]},
    {mod, { cms, []}},
    {env, []} ]}.

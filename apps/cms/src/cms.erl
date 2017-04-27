@@ -4,8 +4,6 @@
 -export([init/1, start/2, stop/1, main/1]).
 -compile(export_all).
 
--include_lib("cms_adm/include/cms.hrl").
-
 main(A)    -> mad_repl:sh(A).
 start(_,_) -> supervisor:start_link({local,cms }, cms,[]).
 stop(_)    -> ok.

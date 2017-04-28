@@ -1,1 +1,1 @@
-[kernel,stdlib,fs,ranch,crypto,compiler,syntax_tools,inets,mnesia,cowlib,kvs,active,gentelella,cowboy,n2o,naga,cms_adm,cms,dispatch_compiler,dynarec,erlydtl,kvs_feeds,mad,markdown,nitro,pbkdf2,sh,syn]
+[kernel,stdlib,blog,fs,gentelella,ranch,crypto,compiler,syntax_tools,inets,mnesia,cowlib,kvs,active,cowboy,n2o,naga,cms_adm,cms,dispatch_compiler,dynarec,erlydtl,kvs_feeds,mad,markdown,nitro,pbkdf2,sh,simplemde,syn]

@@ -8,9 +8,12 @@
  ,{ "/static/gentelella/[...]",
                       naga_static,
                       {dir,"deps/gentelella/priv",[{mimetypes,cow_mimetypes,all}]}}
+ ,{ "/static/blog/[...]",
+                      naga_static,
+                      {dir,"deps/blog/priv",[{mimetypes,cow_mimetypes,all}]}}
  ,{ "/static/[...]",naga_static,{dir,"apps/cms/priv/static",[{mimetypes,cow_mimetypes,all}]}}
 
-%% ROUTING
+%% ROUTING ADMIN
 %% ---------------------
 %% see cms_adm/priv/cms_adm.routes
 
@@ -18,12 +21,7 @@
 %% MVC CMS ROUTING
 %% ---------------------
 
- ,{ "/stream",             [{app,cms},{ctrl,cms_index} ,{action,stream}],[]}
-
-%,{ "/page/[...]",         [{app,cms},{ctrl,cms_page} ,{action,index}],[]}
-%,{ "/category/[...]",     [{app,cms},{ctrl,cms_category} ,{action,index}],[]}
-%,{ "/article/[...]",      [{app,cms},{ctrl,cms_article} ,{action,index}],[]}
-
- ,{ "/[...]",              [{app,cms},{ctrl,cms_index} ,{action,index}],[]}
+ %%/blog/
+ ,{ "/[...]",   [{app,cms},{ctrl,cms_index} ,{action,index}],[]}
 
 ].

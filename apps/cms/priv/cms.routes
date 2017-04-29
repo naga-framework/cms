@@ -8,9 +8,7 @@
  ,{ "/static/gentelella/[...]",
                       naga_static,
                       {dir,"deps/gentelella/priv",[{mimetypes,cow_mimetypes,all}]}}
- ,{ "/static/blog/[...]",
-                      naga_static,
-                      {dir,"deps/blog/priv",[{mimetypes,cow_mimetypes,all}]}}
+
  ,{ "/static/[...]",naga_static,{dir,"apps/cms/priv/static",[{mimetypes,cow_mimetypes,all}]}}
 
 %% ROUTING ADMIN

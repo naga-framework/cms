@@ -1,5 +1,5 @@
 -module(cms_index).
--export([index/3, post/3, before_filters/2]).
+-export([index/3, post/3]).
 -default_action(index).
 -actions([index]).
 
@@ -10,10 +10,6 @@
 -define(CSS,[{blog, [bootstrap3,blog,fontawesome]}]).
 -define(JS,[{blog, [jquery,bootstrap3,blog]}]).
   
-%--------------------------------------------------------------------------------
-% FILTER:
-%--------------------------------------------------------------------------------
-before_filters(Filters, _) -> Filters -- [cms_adm_filter_auth].
 
 %--------------------------------------------------------------------------------
 % INDEX CONTROLLER

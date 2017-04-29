@@ -5,10 +5,6 @@
 
   { "/favicon.ico",cowboy_static,{priv_file,cms,"static/favicon.ico"}}
  ,{ "/static/n2o/[...]",naga_static,{dir,"deps/n2o/priv",[{mimetypes,cow_mimetypes,all}]}}
- ,{ "/static/gentelella/[...]",
-                      naga_static,
-                      {dir,"deps/gentelella/priv",[{mimetypes,cow_mimetypes,all}]}}
-
  ,{ "/static/[...]",naga_static,{dir,"apps/cms/priv/static",[{mimetypes,cow_mimetypes,all}]}}
 
 %% ROUTING ADMIN
@@ -20,6 +16,6 @@
 %% ---------------------
 
  %%/blog/
- ,{ "/[...]",   [{app,cms},{ctrl,cms_index} ,{action,index}],[]}
+ ,{ "/",   [{app,cms},{ctrl,cms_index} ,{action,index}],[]}
 
 ].

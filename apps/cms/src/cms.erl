@@ -9,6 +9,8 @@ start(_,_) -> supervisor:start_link({local,cms }, cms,[]).
 stop(_)    -> ok.
 init([])   -> naga:start([cms]), 
               naga:watch(cms),
+              naga:watch(blog),
+              naga:watch(gentelella),
               sup().
 
 sup()      -> { ok, { { one_for_one, 5, 100 }, [] } }.

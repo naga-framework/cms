@@ -1,5 +1,5 @@
 -module(cms_index).
--export([index/3, post/3]).
+-export([index/3, post/3, contact/3]).
 -default_action(index).
 -actions([index]).
 
@@ -7,27 +7,37 @@
 -include_lib("nitro/include/nitro.hrl").
 -include_lib("naga/include/naga.hrl").
 
--define(CSS,[{blog, [bootstrap3,blog,fontawesome]}]).
--define(JS,[{blog, [jquery,bootstrap3,blog]}]).
-  
-
 %--------------------------------------------------------------------------------
 % INDEX CONTROLLER
 %--------------------------------------------------------------------------------
-index(<<"GET">>, [], _) ->
- 
-  %%TODO: build first page, list at least 4 last post 
-  Bindings = cms_lib:bindings(?CSS, ?JS),
-  Articles = kvs:entries(kvs:get(feed,article), article, 4),
+index(<<"GET">>, [], _) -> 
+  Articles = [begin 
+              {ok,U} = xuser:get(A:get(author_id)),
+              Name = U:get(username),
+              [{id, A:get(id)},
+               {author, Name},
+               {heading, A:get(heading)},
+               {subheading, A:get(subheading)},
+               {publish_date, A:get(publish_date)}]
+              end||A<-kvs:entries(kvs:get(feed,<<"post">>), article, 4)],
+
+  Navigation = [N:to_maps()||N<-kvs:entries(kvs:get(feed,category), category, undefined)],
+
+  Bindings = [{blog,[{name, config:get(blog_name)},
+                     {desc, config:get(blog_desc)}]},
+              {articles,Articles},
+              {navigation, lists:reverse(Navigation)}],
+
+  {ok, Bindings}.
 
 
-  {ok, Bindings ++ [{articles,Articles}]}.
+post(<<"GET">>, [Article|_], _) -> 
+  Bindings = cms_lib:bindings(), 
+  {ok, Bindings}.
 
 
-
-post(<<"GET">>, [Article|_], _) ->
-  io:format("Article ~p~n",[Article]), 
-  Bindings = cms_lib:bindings(?CSS, ?JS), 
+contact(<<"GET">>, _, _) ->
+  Bindings = cms_lib:bindings(), 
   {ok, Bindings}.
 
 

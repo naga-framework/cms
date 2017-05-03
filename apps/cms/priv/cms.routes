@@ -16,6 +16,7 @@
 %% ---------------------
 
  %%/blog/
- ,{ "/",   [{app,cms},{ctrl,cms_index} ,{action,index}],[]}
+ %,{ "/:cat", [{app,cms},{ctrl,cms_index} ,{action,index}],[]}
+ ,{ "/[...]", [{app,cms},{ctrl,cms_index} ,{action,index}],[]}
 
 ].
